@@ -1,0 +1,92 @@
+basePath: /api/v1
+host: localhost:8080
+info:
+  contact: {}
+  description: This the API component of the Event Manager platform.
+  license:
+    name: MIT License
+    url: https://github.com/sebvautour/event-manager/blob/master/LICENSE
+  title: Event Manager API
+  version: "1.0"
+paths:
+  /alert/{id}:
+    get:
+      description: get alert by ID
+      parameters:
+      - description: Alert ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      summary: Get alert
+      tags:
+      - alerts
+  /alert/{id}/events:
+    get:
+      description: get array of events for a given alert ID
+      parameters:
+      - description: Alert ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      summary: Get alert events
+      tags:
+      - alerts
+  /alerts:
+    get:
+      consumes:
+      - application/json
+      description: Get alerts based on a given query
+      parameters:
+      - description: filter as MongoDB JSON schema
+        in: query
+        name: filter
+        type: string
+      - description: filter as MongoDB JSON schema
+        in: body
+        name: filter
+        schema:
+          type: string
+      - description: filter query param will be base64 decoded if encoding param value is base64
+        in: query
+        name: encoding
+        type: string
+      produces:
+      - application/json
+      summary: Get alerts
+      tags:
+      - alerts
+  /events:
+    post:
+      consumes:
+      - application/json
+      description: Adds an event to the message bus
+      parameters:
+      - description: event payload
+        in: body
+        name: event
+        schema:
+          type: string
+      summary: Post event
+      tags:
+      - events
+  /events/alertmanager:
+    post:
+      consumes:
+      - application/json
+      description: Adds an event to the message bus
+      parameters:
+      - description: Alertmanager event payload
+        in: body
+        name: event
+        schema:
+          type: string
+      summary: Post AlertManager event
+      tags:
+      - events
+swagger: "2.0"

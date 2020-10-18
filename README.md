@@ -1,5 +1,5 @@
 # Event Manager
-Platform to aggregate, enrich, and correlate events.
+Platform to aggregate, enrich, and correlate events into alerts.
 
 ## Project Requirements
  - Provide a framework to incorporate custom logic. Most features could be provided as seperate "blocks" of custom logic, allowing for them to be mixed and matched based on needs.
