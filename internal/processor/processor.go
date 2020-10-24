@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/sebvautour/event-manager/internal/service"
-	"github.com/sebvautour/event-manager/internal/vm"
 
 	"gocloud.dev/pubsub"
 )
@@ -12,8 +11,7 @@ import (
 type processorFunc func(msg *pubsub.Message) (err error)
 
 type Processor struct {
-	s  *service.Service
-	vm *vm.VM
+	s *service.Service
 }
 
 func New(svc *service.Service) (p *Processor) {

@@ -16,10 +16,14 @@ Bus to allow for communication of events/messages between services. Two main mes
 Ingestors are any generic service that can push events to the message bus. The could either be entirely third party services, or maybe generic ingestors could be built.
 
 ## Backend
-Main backend service that process the monitoring events.
+Main backend service that process the monitoring events. It is responsible for the following:
+- Creation of events and alerts in the DB
+- De-duplicate events into alerts
+- Set the alert grouping key
+
+
 The backend is the only service that **writes any modifications** to the backend. It has a cache to store temporary data such as for enrichment.
 
-See more details in the [Backend](backend.md) page.
 
 ## API
 The API service allows for external applications to interact with the events. Notably, it is responsible for:
