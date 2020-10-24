@@ -48,6 +48,9 @@ func (p *Processor) processEventMsgFunc(msg *pubsub.Message) (err error) {
 		err := db.Alerts.Actions().Update(alert, docstore.Mods{
 			"Entity":        evt.Entity,
 			"Message":       evt.Message,
+			"Severity":      evt.Severity,
+			"Status":        evt.Status,
+			"Details":       evt.Details,
 			"EventCount":    docstore.Increment(1),
 			"LastEventTime": evt.EventTime,
 		}).Do(p.s.Context)

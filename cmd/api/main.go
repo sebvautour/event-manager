@@ -45,7 +45,7 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("http://localhost:8080/swagger/doc.json")))
 
-	v1.InitRouteGroup(r.Group("/api/v1"))
+	v1.Init(r.Group("/api/v1"))
 
 	svc.Log.Fatal(r.Run(":8080"))
 }
