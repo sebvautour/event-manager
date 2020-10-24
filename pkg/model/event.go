@@ -5,23 +5,21 @@ import (
 	"time"
 )
 
+// ErrorMissingDedupKey is returned when the given event payload does not contain a dedup_key
 var ErrorMissingDedupKey = errors.New("missing dedup_key")
 
+// Event represents a single monitoring event
 type Event struct {
-	EventAlert
-	AlertID   interface{} `json:"alert_id" bson:"alert_id"`
-	EventTime time.Time   `json:"event_time" bson:"event_time"`
-}
-
-// EventAlert contains field common in events and alerts
-type EventAlert struct {
-	ID       interface{}            `json:"id" bson:"_id"`
-	DedupKey string                 `json:"dedup_key" bson:"dedup_key"`
-	Entity   string                 `json:"entity" bson:"entity"`
-	Message  string                 `json:"message" bson:"message"`
-	Severity string                 `json:"severity" bson:"severity"`
-	Status   string                 `json:"status" bson:"status"`
-	Details  map[string]interface{} `json:"details" bson:"details"`
+	ID               interface{}            `json:"id" bson:"_id"`
+	DedupKey         string                 `json:"dedup_key"`
+	SpecificGroupKey string                 `json:"specific_group_key"`
+	Entity           string                 `json:"entity" `
+	Message          string                 `json:"message" `
+	Severity         string                 `json:"severity"`
+	Status           string                 `json:"status" `
+	Details          map[string]interface{} `json:"details"`
+	AlertID          interface{}            `json:"alert_id"`
+	EventTime        time.Time              `json:"event_time"`
 }
 
 // Validate ensures an Event has all the required information and fills certain fields with default values where possible

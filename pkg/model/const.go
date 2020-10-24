@@ -16,6 +16,19 @@ const (
 	SeverityDefault = SeverityMinor
 )
 
+// Severities provides an array of severities, orders from most to least severe
+var Severities = [...]string{SeverityCritical, SeverityMajor, SeverityMinor, SeverityWarning, SeverityInfo}
+
+// SeverityIndex returns the index of the given severity based on the Severites const, or -1 if not found
+func SeverityIndex(severity string) int {
+	for i, s := range Severities {
+		if s == severity {
+			return i
+		}
+	}
+	return -1
+}
+
 const (
 	// StatusActive defines an alert or event that is still active / unresolved
 	StatusActive = "active"

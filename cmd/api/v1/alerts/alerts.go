@@ -2,6 +2,8 @@ package alerts
 
 import (
 	"encoding/base64"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -28,17 +30,43 @@ func InitRouteGroup(r *gin.RouterGroup) {
 // @Param filter query string false "filter as MongoDB JSON schema"
 // @Param filter body string false "filter as MongoDB JSON schema"
 // @Param encoding query string false "filter query param will be base64 decoded if encoding param value is base64"
+// @Param grouped query string false "returns list of alerts grouped by their group_id if true"
 // @Router /alerts [get]
 func getAlertsHandler(c *gin.Context) {
+	filter, err := queryFilter(c)
+	if err != nil {
+		helpers.Error(c, "failed to retrieve filter", http.StatusBadRequest, err.Error())
+		return
+	}
+
+	cursor, err := db.AlertsMongo.Find(c.Request.Context(), filter)
+	if err != nil {
+		helpers.Error(c, "failed to query alerts", http.StatusInternalServerError, err.Error())
+		return
+	}
+	var alerts []model.Alert
+	if err = cursor.All(c.Request.Context(), &alerts); err != nil {
+		helpers.Error(c, "failed to retrieve all alerts", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if c.Query("grouped") != "" && c.Query("grouped") != "false" {
+		c.JSON(200, model.NewAlertGroups(alerts))
+		return
+	}
+	c.JSON(200, alerts)
+
+}
+
+func queryFilter(c *gin.Context) (filter bson.D, err error) {
 	queryFilter := c.Query("filter")
 	var queryFilterBytes []byte
-	var err error
 	if queryFilter != "" {
 		if c.Query("encoding") == "base64" {
 			queryFilterBytes, err = base64.RawStdEncoding.DecodeString(queryFilter)
 			if err != nil {
-				helpers.Error(c, "filter query param not base64 encoded", http.StatusBadRequest, err.Error())
-				return
+				return filter, fmt.Errorf("filter query param not base64 encoded: %w", err)
+
 			}
 		} else {
 			queryFilterBytes = []byte(queryFilter)
@@ -46,39 +74,21 @@ func getAlertsHandler(c *gin.Context) {
 	} else {
 		queryFilterBytes, err = c.GetRawData()
 		if err != nil {
-			helpers.Error(c, "filter needs to be provided in base64 encoded as a query param, or as the request body", http.StatusBadRequest, err.Error())
-			return
+			return filter, fmt.Errorf("filter needs to be provided in base64 encoded as a query param, or as the request body: %w", err)
 		}
 	}
 
 	if queryFilterBytes == nil {
-		helpers.Error(c, "filter needs to be provided in base64 encoded as a query param, or as the request body", http.StatusBadRequest)
-		return
+		return filter, errors.New("filter needs to be provided in base64 encoded as a query param, or as the request body")
 	}
 	if string(queryFilterBytes) == "" {
-		helpers.Error(c, "filter needs to be provided in base64 encoded as a query param, or as the request body", http.StatusBadRequest)
-		return
+		return filter, errors.New("filter needs to be provided in base64 encoded as a query param, or as the request body")
 	}
 
-	var filterBSON bson.D
-
-	if err := bson.UnmarshalExtJSON(queryFilterBytes, true, &filterBSON); err != nil {
-		helpers.Error(c, "failed to parse filter as JSON", http.StatusBadRequest, err.Error())
-		return
+	if err := bson.UnmarshalExtJSON(queryFilterBytes, true, &filter); err != nil {
+		return filter, fmt.Errorf("failed to parse filter as JSON: %w", err)
 	}
-
-	cursor, err := db.AlertsMongo.Find(c.Request.Context(), filterBSON)
-	if err != nil {
-		helpers.Error(c, "failed to query alerts", http.StatusInternalServerError, err.Error())
-		return
-	}
-	var alerts []bson.M
-	if err = cursor.All(c.Request.Context(), &alerts); err != nil {
-		helpers.Error(c, "failed to retrieve all alerts", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(200, alerts)
+	return filter, nil
 }
 
 // @Summary Get alert
@@ -138,7 +148,7 @@ func getAlertIDEventsHandler(c *gin.Context) {
 		helpers.Error(c, "failed to query events", http.StatusInternalServerError, err.Error())
 		return
 	}
-	var events []bson.M
+	var events []model.Event
 	if err = cursor.All(c.Request.Context(), &events); err != nil {
 		helpers.Error(c, "failed to retrieve all events", http.StatusInternalServerError, err.Error())
 		return
