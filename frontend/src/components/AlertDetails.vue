@@ -18,8 +18,8 @@
         <v-chip :color="getSevColor(item.severity)" dark>{{ item.severity }}</v-chip>
       </template>
 
-      <template v-slot:item.details="{ item }">
-          {{ JSON.stringify(item.details) }}
+      <template v-slot:item.labels="{ item }">
+          {{ JSON.stringify(item.labels) }}
       </template>
     </v-data-table>
   </v-card>
@@ -34,9 +34,7 @@ export default {
       headers: [
         { text: 'Event Count', value: 'event_count' },
         { text: 'Severity', value: 'severity' },
-        { text: 'Entity', value: 'entity' },
-        { text: 'Message', value: 'message' },
-        { text: 'Details', value: 'details' }
+        { text: 'Labels', value: 'labels' }
       ],
     }
   },

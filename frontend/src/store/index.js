@@ -35,9 +35,9 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    loadAlertGroups ({ commit }) {
+    loadAlertGroups ({ commit }, filter) {
       axios
-      .get(baseAPIv1+'/alerts?filter={}&grouped=true')
+      .get(baseAPIv1+'/alerts?filter='+filter+'&grouped=true')
       .then(response => {
         commit('SET_ALERT_GROUPS', response.data);
       })

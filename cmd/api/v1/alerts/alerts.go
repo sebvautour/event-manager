@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -39,14 +38,9 @@ func getAlertsHandler(c *gin.Context) {
 		return
 	}
 
-	cursor, err := db.AlertsMongo.Find(c.Request.Context(), filter)
+	alerts, err := db.AlertSearch(c.Request.Context(), filter)
 	if err != nil {
 		helpers.Error(c, "failed to query alerts", http.StatusInternalServerError, err.Error())
-		return
-	}
-	var alerts []model.Alert
-	if err = cursor.All(c.Request.Context(), &alerts); err != nil {
-		helpers.Error(c, "failed to retrieve all alerts", http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -110,12 +104,14 @@ func getAlertIDHandler(c *gin.Context) {
 		return
 	}
 
-	alert := &model.Alert{}
-	alert.ID = id
-
-	err = db.Alerts.Actions().Get(alert).Do(c.Request.Context())
+	alert, found, err := db.AlertByID(c.Request.Context(), id)
 	if err != nil {
 		helpers.Error(c, "failed to retrieve alert", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if !found {
+		helpers.Error(c, "alert not found with given id", http.StatusBadRequest)
 		return
 	}
 
@@ -141,16 +137,9 @@ func getAlertIDEventsHandler(c *gin.Context) {
 		return
 	}
 
-	log.Println(id.Hex())
-
-	cursor, err := db.EventsMongo.Find(c.Request.Context(), bson.M{"AlertID": id})
+	events, err := db.EventsForAlert(c.Request.Context(), id)
 	if err != nil {
-		helpers.Error(c, "failed to query events", http.StatusInternalServerError, err.Error())
-		return
-	}
-	var events []model.Event
-	if err = cursor.All(c.Request.Context(), &events); err != nil {
-		helpers.Error(c, "failed to retrieve all events", http.StatusInternalServerError, err.Error())
+		helpers.Error(c, "failed to query for events", http.StatusInternalServerError, err.Error())
 		return
 	}
 

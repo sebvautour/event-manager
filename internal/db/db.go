@@ -6,21 +6,12 @@ import (
 	"sync"
 
 	"go.mongodb.org/mongo-driver/mongo"
-	"gocloud.dev/docstore"
-	"gocloud.dev/docstore/mongodocstore"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var (
 	// MongoClient gives direct access to the Mongo client
 	MongoClient *mongo.Client
-
-	// Events docstore collection
-	Events      *docstore.Collection
-	EventsMongo *mongo.Collection
-
-	// Alerts collection
-	Alerts      *docstore.Collection
-	AlertsMongo *mongo.Collection
 )
 
 var lck = sync.Mutex{}
@@ -62,36 +53,24 @@ func Close(ctx context.Context) error {
 }
 
 func initDB(ctx context.Context) (err error) {
-	MongoClient, err = mongodocstore.Dial(ctx, "mongodb://localhost:27017")
+	MongoClient, err = mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
-		return fmt.Errorf("connecting to mongo: %w", err)
+		return err
+	}
+	err = MongoClient.Connect(ctx)
+	if err != nil {
+		return err
 	}
 
 	emDB := MongoClient.Database("event-manager")
-	EventsMongo = emDB.Collection("events")
-	AlertsMongo = emDB.Collection("alerts")
+	EventsCollection = emDB.Collection("events")
+	AlertsCollection = emDB.Collection("alerts")
 
-	Events, err = mongodocstore.OpenCollection(EventsMongo, "ID", nil)
-	if err != nil {
-		return fmt.Errorf("opening events collection: %w", err)
-	}
-
-	Alerts, err = mongodocstore.OpenCollection(AlertsMongo, "ID", nil)
-	if err != nil {
-		return fmt.Errorf("opening alerts collection: %w", err)
-	}
 	return nil
 }
 
 // close db package
 func close(ctx context.Context) error {
-	if err := Alerts.Close(); err != nil {
-		return fmt.Errorf("closing alerts collection: %w", err)
-	}
-
-	if err := Events.Close(); err != nil {
-		return fmt.Errorf("closing alerts collection: %w", err)
-	}
 
 	if err := MongoClient.Disconnect(ctx); err != nil {
 		return fmt.Errorf("disconnecting mongo client: %w", err)

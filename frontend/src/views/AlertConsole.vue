@@ -1,7 +1,8 @@
 <template>
   <div>
     <v-main>
-      <v-btn icon @click="refreshAlertGroups" color="green"><v-icon>mdi-reload</v-icon></v-btn>
+      <AlertNav/>
+
       <v-row
         no-gutters
         style="flex-wrap: nowrap;"
@@ -29,21 +30,16 @@
 <script>
 // @ is an alias to /src
 import AlertsTable from "@/components/AlertsTable.vue";
+import AlertNav from "@/components/AlertNav.vue";
+
 import AlertDetails from "@/components/AlertDetails.vue";
 
 export default {
   name: "Console",
   components: {
     AlertsTable,
-    AlertDetails
-  },
-  methods: {
-    refreshAlertGroups() {
-      this.$store.dispatch('loadAlertGroups');
-    }
-  },
-  mounted () {
-    this.$store.dispatch('loadAlertGroups');
+    AlertDetails,
+    AlertNav
   }
 };
 </script>

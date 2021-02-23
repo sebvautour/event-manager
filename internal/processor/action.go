@@ -1,17 +1,15 @@
 package processor
 
 import (
-	"gocloud.dev/pubsub"
+	"github.com/segmentio/kafka-go"
 )
 
-func (p *Processor) ActionProcessor(sub *pubsub.Subscription) error {
-	return p.run(p.ProcessActionMsgFunc, sub)
+func (p *Processor) ActionProcessor(reader *kafka.Reader) error {
+	return p.run(p.ProcessActionMsgFunc, reader)
 }
 
-func (p *Processor) ProcessActionMsgFunc(msg *pubsub.Message) (err error) {
+func (p *Processor) ProcessActionMsgFunc(msg kafka.Message) (retry bool, err error) {
 	// Do work based on the message:
 
-	// Messages must always be acknowledged with Ack.
-	msg.Ack()
-	return nil
+	return false, nil
 }

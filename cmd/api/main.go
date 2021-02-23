@@ -25,9 +25,8 @@ func init() {
 		log.Fatal("Failed to init db: " + err.Error())
 	}
 
-	if err := msgbus.InitEventsTopic(ctx); err != nil {
-		log.Fatal("Failed to init events topic: " + err.Error())
-	}
+	msgbus.InitEventsWriter()
+
 }
 
 // @title Event Manager API

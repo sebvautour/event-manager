@@ -37,8 +37,8 @@ export default {
       headers: [
         { text: 'Alert Count', value: 'alert_count' },
         { text: 'Severity', value: 'primary_alert.severity' },
-        { text: 'Entity', value: 'primary_alert.entity' },
-        { text: 'Message', value: 'primary_alert.message' },
+        { text: 'Entity', value: 'primary_alert.labels.entity' },
+        { text: 'Message', value: 'primary_alert.labels.message' },
         { text: '', value: 'action', sortable: false },
       ],
     }

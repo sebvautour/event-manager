@@ -10,16 +10,14 @@ var ErrorMissingDedupKey = errors.New("missing dedup_key")
 
 // Event represents a single monitoring event
 type Event struct {
-	ID               interface{}            `json:"id" bson:"_id"`
-	DedupKey         string                 `json:"dedup_key"`
-	SpecificGroupKey string                 `json:"specific_group_key"`
-	Entity           string                 `json:"entity" `
-	Message          string                 `json:"message" `
-	Severity         string                 `json:"severity"`
-	Status           string                 `json:"status" `
-	Details          map[string]interface{} `json:"details"`
-	AlertID          interface{}            `json:"alert_id"`
-	EventTime        time.Time              `json:"event_time"`
+	ID               interface{}            `bson:"_id" json:"id"`
+	DedupKey         string                 `bson:"dedup_key" json:"dedup_key"`
+	Severity         string                 `bson:"severity" json:"severity"`
+	Status           string                 `bson:"status" json:"status"`
+	Labels           map[string]interface{} `bson:"labels" json:"labels"`
+	SpecificGroupKey string                 `bson:"specific_group_key" json:"specific_group_key"`
+	AlertID          interface{}            `bson:"alert_id" json:"alert_id"`
+	EventTime        time.Time              `bson:"event_time" json:"event_time"`
 }
 
 // Validate ensures an Event has all the required information and fills certain fields with default values where possible
@@ -36,8 +34,8 @@ func (evt *Event) Validate() error {
 		evt.Status = StatusDefault
 	}
 
-	if evt.Details == nil {
-		evt.Details = make(map[string]interface{})
+	if evt.Labels == nil {
+		evt.Labels = make(map[string]interface{})
 	}
 
 	if evt.EventTime.IsZero() {
